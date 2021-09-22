@@ -12,6 +12,20 @@
 
 uint32_t contador = 0;
 
+static void IRAM_ATTR botao_isr_handler(void *arg)
+{
+	//verifica se o botao 1 foi a fonte da interrupcao
+	//1 - como fazer debounce na leitura da interrupcao de gpio?
+	if(BOTAO_1 == (uint32_t) arg) //typecast para tipo uint32_t - inteiro usado na definicao  dos pinos
+	{
+		//if(gpio_get_level(BOTAO_1 == 0)
+		if(gpio_get_level((uint32_t) arg) == 0)
+		{
+			contador++;
+		}
+	}
+}
+
 void app_main(void)
 {
     printf("Inicializando Esquenta ESP32... \n");
@@ -47,25 +61,24 @@ void app_main(void)
 
     //Configuração dos LEDs
     gpio_config_t led_config = {
-        .intr_type = GPIO_INTR_DISABLE, //sem interrupção por hora
+        .intr_type = GPIO_INTR_NEGEDGE, //interrupção na borda de descida
         .mode = GPIO_MODE_OUTPUT,
         .pin_bit_mask = (1ULL << LED_PLACA) | (1ULL << LED_CONTROLE),
         .pull_up_en = 0
     };
     gpio_config(&led_config);
 
-	uint32_t botao_1_anterior = 0;
+	
+	gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1); //estamos configurando uma rotian de tratamento de interrupcao de baixa prioridade
+	gpio_isr_handler_add(BOTAO_1, botao_isr_handler, (void*) BOTAO_1);
+	
+	uint8_t estado_led = 0;
 
 	while(1)
 	{
-		vTaskDelay(30/portTICK_PERIOD_MS);
-		//resposta em borda de descida
-		if(botao_1_anterior  == 1 && gpio_get_level(BOTAO_1) == 0)
-		{
-			//desempenhamos alguma ação ao apertar o botão
-			contador++;
-		}
+		vTaskDelay(1000/portTICK_PERIOD_MS);
 		printf("Contador: %d\n", contador);
-		botao_1_anterior  = gpio_get_level(BOTAO_1);
+		gpio_set_level(LED_PLACA, estado_led);
+		estado_led = !estado_led;
 	}
 }
