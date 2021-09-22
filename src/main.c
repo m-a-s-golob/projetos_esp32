@@ -10,8 +10,24 @@
 #define BOTAO_1         GPIO_NUM_22
 #define LED_CONTROLE    GPIO_NUM_21
 
+#define TIMER_DIVIDER	(16) //hardware timer clock divider
+#define TIMER_SCALE 	(TIMER_BASE_CLK / TIMER_DIVIDER) //converte o valor do contador em segundos
+
 uint32_t contador = 0;
 
+typedef struct{
+	int timer_group;	
+	int timer_idx;
+	int alarm_interval;
+	bool auto_reload;
+} exemplo_timer_info_t;
+
+typedef struct{
+	exemplo_timer_info_t info;
+	uint64_t timer_counter_value;
+} exemplo_timer_event_t;
+
+//callback para tratamento da interrupcao do botao
 static void IRAM_ATTR botao_isr_handler(void *arg)
 {
 	//verifica se o botao 1 foi a fonte da interrupcao
