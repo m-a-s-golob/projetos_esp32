@@ -6,10 +6,13 @@
 #include "esp_spi_flash.h"
 #include "driver/gpio.h"
 #include "driver/timer.h"
+#include "driver/ledc.h"
 
 #define LED_PLACA       GPIO_NUM_2
 #define BOTAO_1         GPIO_NUM_22
 #define LED_CONTROLE    GPIO_NUM_21
+#define ADC_POT         ADC1_CHANNEL_4
+#define LED_PWM         GPIO_NUM_19
 
 #define TIMER_DIVIDER	(16)                                // divisor de clock de hardware em fator 16x
 #define TIMER_SCALE 	(TIMER_BASE_CLK / TIMER_DIVIDER)    // converte o valor em segundos; TIMER_BASE_CLK = 80MHz por padrão
